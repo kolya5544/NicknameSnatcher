@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NicknameSnatcher": {
+      "commandName": "Project",
+      "commandLineArgs": "--username kolya5544 --webhook https://discord.com/api/webhooks/1380237847885385849/BaLgguglz1PZfk38vZy5Isf9CSUHBh2c7HSl7Z-DlbpyI3_yjtWsGhvw18z8eEBG8zp2"
+    }
+  }
+}
