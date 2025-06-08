@@ -10,6 +10,7 @@ using NicknameSnatcher.Runners;
 using System.Dynamic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using XboxAuthNet.Game.Authenticators;
 using XboxAuthNet.Game.Msal;
 using static NicknameSnatcher.Logger;
 
@@ -62,11 +63,18 @@ namespace NicknameSnatcher
                     session = await LoginXBox(relog: opt.Relog);
                     opt.Relog = false;
 
-                    PlayerProfile atProfile = await mojang.GetProfileUsingAccessToken(session.AccessToken);
-                    currentNickname = atProfile.Name;
+                    try
+                    {
+                        PlayerProfile atProfile = await mojang.GetProfileUsingAccessToken(session.AccessToken);
+                        currentNickname = atProfile.Name;
 
-                    Log($"Initialized a new user! UUID: {atProfile.UUID}");
-                    Log($"Username: {atProfile.Name}, skin: {atProfile.Skin.Url}");
+                        Log($"Initialized a new user! UUID: {atProfile.UUID}");
+                        Log($"Username: {atProfile.Name}, skin: {atProfile.Skin.Url}");
+                    } catch
+                    {
+                        Log($"Couldn't initialize the user. Assuming account with no name");
+                        currentNickname = opt.Username;
+                    }
 
                     if (opt.Aggressive)
                     {
@@ -100,7 +108,13 @@ namespace NicknameSnatcher
             var authenticator = handler.CreateAuthenticatorWithDefaultAccount();
             authenticator.AddMsalOAuth(app, msal => msal.DeviceCode(DeviceResultCallback));
             authenticator.AddXboxAuthForJE(xbox => xbox.Basic());
-            authenticator.AddJEAuthenticator();
+            authenticator.AddJEAuthenticator((build) =>
+            {
+                var collection = new AuthenticatorCollection();
+                collection.AddAuthenticator(StaticValidator.Invalid, build.TokenAuthenticator());
+                collection.AddAuthenticator(StaticValidator.Invalid, new FakeSessionAuthenticator(build.TokenSource, build.ProfileSource));
+                return collection;
+            });
 
             var session = await authenticator.ExecuteForLauncherAsync();
             return session;

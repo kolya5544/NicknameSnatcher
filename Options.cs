@@ -29,6 +29,9 @@ namespace NicknameSnatcher
         [Option("relog", HelpText = "Relog on program startup.")]
         public bool Relog { get; set; }
 
+        [Option("display_ping", HelpText = "Display latency between client and Mojang's servers.", Default = false)]
+        public bool DisplayPing { get; set; }
+
         [Option("aggressive", HelpText = "Use aggressive variation. 'Silent' variation first checks if the nickname is available, " +
             "and thus has a lower rate limit. 'Aggressive', however, sends name change requests regardless of whether or not the nickname is available.", Default = false)]
         public bool Aggressive { get; set; }

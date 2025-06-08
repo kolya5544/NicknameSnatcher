@@ -1,6 +1,7 @@
 ﻿using MojangAPI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -14,6 +15,7 @@ namespace NicknameSnatcher
         private int _index = -1;                   // round-robin cursor
         private HttpClient? _current;               // reused until 429
         private readonly SemaphoreSlim _mutex = new(1, 1);
+        private Stopwatch _stopwatch = new Stopwatch();
 
         public ProxyDelegate(IEnumerable<string>? proxies)
         {
@@ -50,9 +52,15 @@ namespace NicknameSnatcher
                 cancel.ThrowIfCancellationRequested();
                 HttpClient client = await GetOrCreateClientAsync(cancel);
 
+                _stopwatch.Start();
                 try
                 {
-                    return await work(client);
+                    var r = await work(client);
+                    _stopwatch.Stop();
+                    if (Program.options.DisplayPing)
+                        Logger.Log($"Proxy: {_proxies[_index]} | Ping: {_stopwatch.ElapsedMilliseconds} ms");
+                    _stopwatch.Reset();
+                    return r;
                 }
                 catch (MojangException ex) when (ex.StatusCode == 429)
                 {
