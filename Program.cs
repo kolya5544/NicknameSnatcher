@@ -97,7 +97,7 @@ namespace NicknameSnatcher
             }
         }
 
-        static async Task<MSession> LoginXBox(bool relog)
+        public static async Task<MSession> LoginXBox(bool relog)
         {
             var app = MsalClientHelper.CreateDefaultApplicationBuilder("499c8d36-be2a-4231-9ebd-ef291b7bb64c").Build();
             var handlerBuilder = new JELoginHandlerBuilder();

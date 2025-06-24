@@ -26,7 +26,7 @@ namespace NicknameSnatcher
             HelpText = "Delay between attempts in milliseconds.")]
         public int Delay { get; set; }
 
-        [Option("relog", HelpText = "Relog on program startup.")]
+        [Option("relog", HelpText = "Relog on program startup.", Default = false)]
         public bool Relog { get; set; }
 
         [Option("display_ping", HelpText = "Display latency between client and Mojang's servers.", Default = false)]

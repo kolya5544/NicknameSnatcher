@@ -8,15 +8,43 @@ using System.Threading.Tasks;
 using CmlLib.Core.Auth;
 using static NicknameSnatcher.Program;
 using static NicknameSnatcher.Logger;
+using MojangAPI.SecurityQuestion;
 
 namespace NicknameSnatcher.Runners
 {
     internal class SilentRunner
     {
+        public static Random rng = new Random();
+
         public static async Task SilentRunAsync(ProxyDelegate proxyDel, MSession session, Options opt)
         {
             while (true)
             {
+                // occasionally make sure we're still authed
+                switch (rng.Next(0, 5000))
+                {
+                    case 0:
+                        try
+                        {
+                            var clientHandler = new HttpClientHandler();
+
+                            var httpClient = new HttpClient(clientHandler);
+
+                            Mojang mojang = new Mojang(httpClient);
+                            MojangAuth auth = new MojangAuth(httpClient);
+                            QuestionFlow qflow = new QuestionFlow(httpClient);
+
+                            PlayerProfile atProfile = await mojang.GetProfileUsingAccessToken(session.AccessToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.ToString().Contains("403: Forbid")) throw ex;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
                 // 1) check availability
                 bool availability = false;
                 try
